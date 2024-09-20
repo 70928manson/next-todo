@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react'
+import React from 'react'
 import { TodoItem } from './TodoItem';
 
 import {
@@ -14,7 +14,8 @@ import {
 } from "@/components/ui/pagination"
 
 interface TodoListContainerProps {
-    todos: Todo[]
+    todos: Todo[],
+    getTodo: () => void
 }
 
 type Todo = {
@@ -26,9 +27,9 @@ type Todo = {
     updated_at: string;
 }
 
-export const TodoListContainer = ({ todos }: TodoListContainerProps) => {
-    const [page, setPage] = useState(1);
-    
+export const TodoListContainer = ({ todos, getTodo }: TodoListContainerProps) => {
+    // const [page, setPage] = useState(1);
+
     return (
         <div className="p-6 bg-[#333333] rounded flex flex-col gap-4">
             {
@@ -36,11 +37,13 @@ export const TodoListContainer = ({ todos }: TodoListContainerProps) => {
                     return (
                         <TodoItem
                             key={todo.id}
+                            id={todo.id}
                             name={todo.name}
                             description={todo.description}
                             is_completed={todo.is_completed}
                             created_at={todo.created_at}
                             updated_at={todo.updated_at}
+                            getTodo={getTodo}
                         />
                     )
                 })

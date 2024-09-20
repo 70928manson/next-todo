@@ -1,30 +1,49 @@
+"use client";
+
 import { Plus } from "lucide-react";
 import { fetchWayiTodo } from "./actions/todoActions"
 import { TodoListContainer } from "./components/TodoListContainer";
-import { TodoButton } from "./components/TodoButton";
+import { TodoModal } from "./components/TodoModal";
+import { useEffect, useState } from "react";
 
-export default async function Home() {
-  const { status, total, data } = await fetchWayiTodo(1, "all");
+export default function Home() {
+  const [todos, setTodos] = useState([]);
+  const [addModalOpen, setAddModalOpen] = useState(false);
 
-  console.log("tasks", data)
+  const getTodo = async () => {
+    const data = await fetchWayiTodo(1, 'all');
+    const todo = data.data
+    setTodos(todo);
+  };
+
+  useEffect(() => {
+    getTodo();
+  }, []);
 
   return (
-    <main className="max-w-4xl mx-auto mt-4">
-      <h1 className="text-center my-2 text-2xl font-bold">TODO LIST APP</h1>
-      <div className="flex justify-between my-2">
-        <TodoButton
-            type="Add"
-            trigger="+ Add"
-            title="Add Todo"
-            icon={<Plus size={16} color="white" />}
-            action="Add"
-        />
-        {/*TODO: Selector */}
-        {/* <div className="text-black">
+    <>
+      <main className="max-w-4xl mx-auto mt-4">
+        <h1 className="text-center my-2 text-2xl font-bold">TODO LIST APP</h1>
+        <div className="flex justify-between my-2">
+          <div className="flex items-center gap-2 bg-white text-black rounded px-4 py-2 text-sm font-medium cursor-pointer hover:bg-gray-300" onClick={() => setAddModalOpen(true)}>
+            <Plus size={16} /> Add Todo
+          </div>
+          {/*TODO: Selector */}
+          {/* <div className="text-black">
           <Button variant="outline">...</Button>
         </div> */}
-      </div>
-      <TodoListContainer todos={data} />
-    </main>
+        </div>
+        <TodoListContainer todos={todos} getTodo={getTodo} />
+      </main>
+      <TodoModal
+        open={addModalOpen}
+        setOpen={setAddModalOpen}
+        type="Add"
+        title="Add Todo"
+        icon={<Plus size={16} color="white" />}
+        action="Add"
+        getTodo={getTodo}
+      />
+    </>
   )
 }
