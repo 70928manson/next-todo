@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react'
+import React, { useState } from 'react'
 import {
     Dialog,
     DialogTrigger,
@@ -9,6 +9,7 @@ import {
 import { TodoModal } from './TodoModal';
 
 interface TodoButtonProps {
+    type: string,
     trigger: React.ReactNode,
     title: string,
     icon: React.ReactNode,
@@ -16,18 +17,21 @@ interface TodoButtonProps {
 }
 
 
-export const TodoButton = ({ trigger, title, icon, action }: TodoButtonProps) => {
+export const TodoButton = ({ type, trigger, title, icon, action }: TodoButtonProps) => {
+    const [open, setOpen] = useState(false);
 
     return (
         <div className="text-black">
-            <Dialog>
+            <Dialog open={open}>
                 <DialogTrigger className="bg-white rounded px-4 py-2 text-sm font-medium">
                     {trigger}
                 </DialogTrigger>
                 <TodoModal
+                    type={type}
                     title={title}
                     icon={icon}
                     action={action}
+                    setOpen={setOpen}
                 />
             </Dialog>
         </div>

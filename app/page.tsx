@@ -13,10 +13,11 @@ export default async function Home() {
       <h1 className="text-center my-2 text-2xl font-bold">TODO LIST APP</h1>
       <div className="flex justify-between my-2">
         <TodoButton
-          trigger="+ Add"
-          title="Add Todo"
-          icon={<Plus size={16} color="white" />}
-          action="Add"
+            type="Add"
+            trigger="+ Add"
+            title="Add Todo"
+            icon={<Plus size={16} color="white" />}
+            action="Add"
         />
         {/*TODO: Selector */}
         {/* <div className="text-black">

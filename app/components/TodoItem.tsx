@@ -13,7 +13,7 @@ interface TodoItemProps {
 }
 
 export const TodoItem = ({ name, description, is_completed, updated_at }: TodoItemProps) => {
-    
+
     return (
         <div className="p-2 bg-white text-black rounded flex justify-between">
             <div className="flex gap-2">
@@ -28,6 +28,7 @@ export const TodoItem = ({ name, description, is_completed, updated_at }: TodoIt
             </div>
             <div className="flex gap-1 items-center">
                 <TodoButton
+                    type="Edit"
                     trigger={
                         <div className="p-2 bg-gray-100 hover:bg-gray-300 hover:text-red-500 rounded cursor-pointer">
                             <Pencil />

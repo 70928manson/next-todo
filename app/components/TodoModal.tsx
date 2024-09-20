@@ -24,18 +24,23 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 
+import axios from 'axios';
+import moment from 'moment';
+
 const formSchema = z.object({
     name: z.string().min(1).max(10),
     description: z.string().max(30),
 })
 
 interface TodoModalProps {
+    type: string,
     title: string,
     icon: React.ReactNode,
     action: string,
+    setOpen:  React.Dispatch<React.SetStateAction<boolean>>
 }
 
-export const TodoModal = ({ title, icon, action }: TodoModalProps) => {
+export const TodoModal = ({ type, title, icon, action, setOpen }: TodoModalProps) => {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -47,8 +52,21 @@ export const TodoModal = ({ title, icon, action }: TodoModalProps) => {
     function onSubmit(values: z.infer<typeof formSchema>) {
         // Add Edit Delete
         console.log(values)
-        
-        // axios.post("...")
+
+        if (type === "Add") {
+            const data = {
+                name: values.name,
+                description: values.description,
+                is_completed: false,
+                created_at: moment().toISOString(),
+                updated_at: ""
+            };
+            axios.post(`https://wayi.league-funny.com/api/task`, data).then((res) => {
+                console.log("res", res)
+                setOpen(false);
+            })
+        }
+
     }
     return (
         <DialogContent className="bg-black border-gray-700">
