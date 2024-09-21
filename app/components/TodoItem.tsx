@@ -6,18 +6,20 @@ import { TodoModal } from './TodoModal';
 import { DeleteModal } from './DeleteModal';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import moment from 'moment';
+import { Todo } from '../types/todo';
 
 interface TodoItemProps {
-    id: number,
-    name: string,
-    description: string,
-    is_completed: boolean,
-    created_at: string,
-    updated_at: string
-    getTodo: () => void
+    todo: Todo,
+    getTodo: () => void,
+    type: string,
+    currentPage: number,
+    total: number,
+    todoType: string,
 }
 
-export const TodoItem = ({ id, name, description, is_completed, updated_at, getTodo }: TodoItemProps) => {
+export const TodoItem = ({ todo, getTodo, type, todoType, currentPage, total }: TodoItemProps) => {
+    const { id, name, description, is_completed, created_at, updated_at } = todo;
     const [editModalOpen, setEditModalOpen] = useState(false);
     const [checked, setChecked] = useState(is_completed);
 
@@ -25,8 +27,8 @@ export const TodoItem = ({ id, name, description, is_completed, updated_at, getT
         const baseUrl = "https://wayi.league-funny.com/api/task";
 
         axios.patch(`${baseUrl}/${id}`).then((res) => {
-            console.log("update completed status check", res)
-            toast.success('update completed status success');
+            console.log("Update completed status check", res)
+            toast.success('Update completed status success');
             getTodo();
         })
 
@@ -43,7 +45,7 @@ export const TodoItem = ({ id, name, description, is_completed, updated_at, getT
                     <div>
                         <h2>Name: {name}</h2>
                         <p>Description: {description}</p>
-                        <p>時間: {updated_at ? updated_at : is_completed}</p>
+                        <p>時間: {updated_at ? `${moment(updated_at).format("YYYY-MM-DD HH:mm")}` : moment(created_at).format("YYYY-MM-DD HH:mm")}</p>
                     </div>
                 </div>
                 <div className="flex gap-1 items-center">
@@ -53,20 +55,22 @@ export const TodoItem = ({ id, name, description, is_completed, updated_at, getT
                     <DeleteModal
                         id={id}
                         getTodo={getTodo}
+                        type={type}
+                        currentPage={currentPage}
+                        total={total}
                     />
                 </div>
             </div>
             <TodoModal
                 open={editModalOpen}
                 setOpen={setEditModalOpen}
-                type="Edit"
                 title="Edit Todo"
-                icon={<Pencil size={16} color="white" />}
-                action="Edit"
+                iconWithText={<><Pencil size={16} color="white" />Edit</>}
                 getTodo={getTodo}
-                id={id}
-                name={name}
-                description={description}
+                todo={todo}
+                todoType={todoType}
+                currentPage={currentPage}
+                total={total}
             />
         </>
     )
