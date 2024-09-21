@@ -17,17 +17,22 @@ import toast from 'react-hot-toast';
 
 interface DeleteModalProps {
     id: number,
-    getTodo: () => void
+    getTodo: (page: number, type: string) => void,
+    type: string,
+    currentPage: number,
+    total: number
 }
 
-export const DeleteModal = ({ id, getTodo }: DeleteModalProps) => {
+export const DeleteModal = ({ id, getTodo, type, currentPage, total }: DeleteModalProps) => {
     const handleDelete = () => {
         const baseUrl = "https://wayi.league-funny.com/api/task";
 
         axios.delete(`${baseUrl}/${id}`).then((res) => {
-            console.log("delete res check", res)
-            toast.success('delete Todo success');
-            getTodo();
+            console.log("Delete res check", res)
+            toast.success('Delete Success');
+            const totalPages = Math.ceil((total - 1) / 10); // 刪除後的總頁數
+            const nextPage = currentPage > totalPages ? Math.max(currentPage - 1, 1) : currentPage;
+            getTodo(nextPage, type);
         })
     }
     return (
@@ -43,7 +48,10 @@ export const DeleteModal = ({ id, getTodo }: DeleteModalProps) => {
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogAction onClick={() => handleDelete()}>Delete</AlertDialogAction>
+                    <AlertDialogAction onClick={() => handleDelete()} className="flex justify-center items-center gap-1">
+                        <Trash2 size={16} />
+                        Delete
+                    </AlertDialogAction>
                     <AlertDialogCancel className="text-black">Cancel</AlertDialogCancel>
                 </AlertDialogFooter>
             </AlertDialogContent>
