@@ -27,6 +27,7 @@ import { Input } from "@/components/ui/input"
 import axios from 'axios';
 import moment from 'moment';
 import toast from 'react-hot-toast';
+import { Todo } from '../types/todo';
 
 const formSchema = z.object({
     name: z.string().min(1).max(10),
@@ -36,17 +37,17 @@ const formSchema = z.object({
 interface TodoModalProps {
     open: boolean,
     setOpen: React.Dispatch<React.SetStateAction<boolean>>,
-    type: string,
     title: string,
-    icon: React.ReactNode,
-    action: string,
-    getTodo: () => void,
-    id?: number,
-    name?: string,
-    description?: string
+    iconWithText: React.ReactNode,
+    getTodo: (page: number, type: string) => void,
+    todo?: Todo,
+    todoType: string,
+    currentPage: number,
+    total: number
 }
 
-export const TodoModal = ({ open, setOpen, type, title, icon, action, getTodo, id, name, description }: TodoModalProps) => {
+export const TodoModal = ({ open, setOpen, title, iconWithText, getTodo, todo, todoType, currentPage, total }: TodoModalProps) => {
+    const { id, name, description } = todo || {};
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -59,19 +60,29 @@ export const TodoModal = ({ open, setOpen, type, title, icon, action, getTodo, i
         // Add Edit Delete
         const { name, description } = values;
         const baseUrl = "https://wayi.league-funny.com/api/task";
+
+        const data = {
+            name,
+            description,
+            is_completed: title === "Add Todo" ? false : undefined, // 只在 "Add Todo" 時設置
+            created_at: title === "Add Todo" ? moment().toISOString() : undefined,
+            updated_at: title === "Add Todo" ? "" : moment().toISOString()
+        };
+
         try {
-            if (type === "Add") {
-                const data = {
-                    name: name,
-                    description: description,
-                    is_completed: false,
-                    created_at: moment().toISOString(),
-                    updated_at: ""
-                };
+            if (title === "Add Todo") {
                 axios.post(`${baseUrl}`, data).then((res) => {
                     console.log("add res check", res)
-                    toast.success('Add Todo success');
-                    getTodo();
+                    toast.success('Add Success');
+
+                    // 新增完後的總數量
+                    const updatedTotal = total + 1;
+                    // 計算新增完後應該顯示的頁碼
+                    const nextPage = Math.ceil(updatedTotal / 10);
+
+                    // 跳到計算好的頁碼
+                    getTodo(nextPage, todoType);
+
                     setOpen(false);
                     form.reset({
                         name: '',
@@ -79,16 +90,13 @@ export const TodoModal = ({ open, setOpen, type, title, icon, action, getTodo, i
                     });
 
                 })
-            } else if (type === "Edit") {
-                const data = {
-                    name: name,
-                    description: description,
-                    updated_at: moment().toISOString(),
-                };
+            } else if (title === "Edit Todo") {
                 axios.put(`${baseUrl}/${id}`, data).then((res) => {
                     console.log("edit res check", res)
-                    toast.success('edit Todo success');
-                    getTodo();
+                    toast.success('Edit Success');
+
+                    getTodo(currentPage, todoType);
+
                     setOpen(false);
                 })
             }
@@ -139,7 +147,7 @@ export const TodoModal = ({ open, setOpen, type, title, icon, action, getTodo, i
                             )}
                         />
                         <div className="flex justify-end gap-2">
-                            <Button type="submit" >{icon}{action}</Button>
+                            <Button type="submit" className="flex justify-center items-center gap-1">{iconWithText}</Button>
                             <Button type="button" variant="secondary" onClick={() => setOpen(false)}>
                                 Close
                             </Button>
