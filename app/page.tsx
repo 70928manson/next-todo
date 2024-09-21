@@ -6,14 +6,45 @@ import { TodoListContainer } from "./components/TodoListContainer";
 import { TodoModal } from "./components/TodoModal";
 import { useEffect, useState } from "react";
 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 export default function Home() {
   const [todos, setTodos] = useState([]);
   const [addModalOpen, setAddModalOpen] = useState(false);
 
-  const getTodo = async () => {
-    const data = await fetchWayiTodo(1, 'all');
-    const todo = data.data
-    setTodos(todo);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [todoType, setTodoType] = useState("all");
+  const [total, setTotal] = useState(0);
+
+  const [loading, setLoading] = useState(true);
+
+  const getTodo = async (page = 1, type = "all") => {
+    setLoading(true);
+    const wayiTodo = await fetchWayiTodo(page, type);
+    setTodos(wayiTodo.data);
+    setTotal(wayiTodo.total)
+    setLoading(false);
+  };
+
+  const handleTypeChange = (e: string) => {
+    const todoTypeMapping: { [key: string]: string } = {
+      "All": "all",
+      "Completed": "completed",
+      "Uncompleted": "uncompleted",
+    };
+
+    const todoType = todoTypeMapping[e];
+
+    if (todoType) {
+      getTodo(1, todoType);
+      setTodoType(todoType);
+    }
   };
 
   useEffect(() => {
@@ -28,21 +59,36 @@ export default function Home() {
           <div className="flex items-center gap-2 bg-white text-black rounded px-4 py-2 text-sm font-medium cursor-pointer hover:bg-gray-300" onClick={() => setAddModalOpen(true)}>
             <Plus size={16} /> Add Todo
           </div>
-          {/*TODO: Selector */}
-          {/* <div className="text-black">
-          <Button variant="outline">...</Button>
-        </div> */}
+          <Select onValueChange={handleTypeChange}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Todo Type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="All">All</SelectItem>
+              <SelectItem value="Completed">Completed</SelectItem>
+              <SelectItem value="Uncompleted">Uncompleted</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-        <TodoListContainer todos={todos} getTodo={getTodo} />
+        <TodoListContainer
+          todos={todos}
+          todoType={todoType}
+          total={total}
+          getTodo={getTodo}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          loading={loading}
+        />
       </main>
       <TodoModal
         open={addModalOpen}
         setOpen={setAddModalOpen}
-        type="Add"
         title="Add Todo"
-        icon={<Plus size={16} color="white" />}
-        action="Add"
+        iconWithText={<><Plus size={16} color="white" />Add</>}
         getTodo={getTodo}
+        todoType={todoType}
+        currentPage={currentPage}
+        total={total}
       />
     </>
   )
